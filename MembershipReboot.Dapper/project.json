@@ -1,0 +1,25 @@
+﻿{
+  "packOptions": {
+    "licenseUrl": "https://mit-license.org/license.txt",
+    "summary": "An extension for MembershipReboot that adds support for using Dapper as the ORM",
+    "owners": [ "tncalvert" ]
+  },
+  "version": "0.1.0-*",
+  "title": "MembershipReboot.Dapper",
+  "description": "An extension for MembershipReboot that adds support for using Dapper as the ORM.",
+  "authors": [ "Tim Calvert" ],
+  "copyright": "2016 Tim Calvert",
+  "dependencies": {},
+  "buildOptions": {
+    "xmlDoc": true,
+    "warningsAsErrors": true
+  },
+  "frameworks": {
+    "net451": {
+      "dependencies": {
+        "Dapper": "1.50.2",
+        "BrockAllen.MembershipReboot": "8.4.0"
+      }
+    }
+  }
+}
