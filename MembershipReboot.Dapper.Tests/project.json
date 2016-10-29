@@ -2,7 +2,11 @@
   "packOptions": {
     "licenseUrl": "https://mit-license.org/license.txt",
     "summary": "MembershipReboot.Dapper.Tests",
-    "owners": [ "tncalvert" ]
+    "owners": [ "tncalvert" ],
+    "repository": {
+      "type": "git",
+      "url": "https://github.com/tncalvert/MembershipReboot.Dapper"
+    }
   },
   "version": "1.0.0-*",
   "title": "MembershipReboot.Dapper.Tests",

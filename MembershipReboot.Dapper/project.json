@@ -2,7 +2,11 @@
   "packOptions": {
     "licenseUrl": "https://mit-license.org/license.txt",
     "summary": "An extension for MembershipReboot that adds support for using Dapper as the ORM",
-    "owners": [ "tncalvert" ]
+    "owners": [ "tncalvert" ],
+    "repository": {
+      "type": "git",
+      "url": "https://github.com/tncalvert/MembershipReboot.Dapper"
+    }
   },
   "version": "0.1.0-*",
   "title": "MembershipReboot.Dapper",
