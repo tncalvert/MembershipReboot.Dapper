@@ -40,7 +40,7 @@ DapperUserAccountRepository(IDbConnection connection, Utilities utilities = null
 ```
 | Parameter | Purpose | Default | Notes |
 | --- | --- | --- | --- |
-| connection | The instance of `IDbConnection` that is connected to the database. | none | Must be instanciated. If it is closed, it will be opened. |
+| connection | The instance of `IDbConnection` that is connected to the database. | none | Must be instantiated. If it is closed, it will be opened. |
 | utilities | An instance of the `Utilities` class | null | See below for details. |
 | userAccountTable | The name of the table used to store accounts | "UserAccounts" | |
 | tableNameMap | Used to map child type objects (e.g., user claims) to the appropriate table. | null | Default values are provided for the child types in `RelationalUserAccount`. See below. |
@@ -53,11 +53,11 @@ DapperGroupRepository(IDbConnection connection, Utilities utilities = null, stri
 ```
 | Parameter | Purpose | Default | Notes |
 | --- | --- | --- | --- |
-| connection | The instance of `IDbConnection` that is connected to the database. | none | Must be instanciated. If it is closed, it will be opened. |
+| connection | The instance of `IDbConnection` that is connected to the database. | none | Must be instantiated. If it is closed, it will be opened. |
 | utilities | An instance of the `Utilities` class | null | See below for details. |
 | groupTable | The name of the table used to store accounts | "Groups" | |
-| tableNameMap | Used to map child type objects (e.g., user claims) to the appropriate table. | null | Default values are provided for the child types in `RelationalUserAccount`. See below. |
-| keySelectorMap | Used to define the key property of child types. | null | Default values are provided for the types in `RelationalUserAccount`. See below. |
+| tableNameMap | Used to map child type objects (e.g., group childs) to the appropriate table. | null | Default values are provided for the child types in `RelationalGroup`. See below. |
+| keySelectorMap | Used to define the key property of child types. | null | Default values are provided for the types in `RelationalGroup`. See below. |
 
 #### Utilities
 
