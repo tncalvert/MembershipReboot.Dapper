@@ -168,7 +168,7 @@ Quotes an identifier for use in an SQL statement. The default is to use square b
 There is a test suite in the `MembershipReboot.Dapper.Tests` project. It uses xUnit. The tests can be run through
 Visual Studio or by navigating to the project folder and running `dotnet test`.
 
-You can generate and view test coverage (through OpenCover and ReportGenerator) by running the `run_test_coverage.ps1`
+You can generate and view test coverage (through [OpenCover](https://github.com/OpenCover/opencover) and [ReportGenerator](https://github.com/danielpalme/ReportGenerator)) by running the `run_test_coverage.ps1`
 script. This will create a folder called `test_coverage` in the solution folder. Inside will be the coverage results
 and generated report. The report will automatically open after the script is finished.
 
