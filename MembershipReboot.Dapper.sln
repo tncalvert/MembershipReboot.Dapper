@@ -1,39 +1,60 @@
-﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio 15
+VisualStudioVersion = 15.0.27004.2006
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{C6208ABA-274E-4FCE-B2BD-DC1F6C1119DB}"
 	ProjectSection(SolutionItems) = preProject
 		.gitignore = .gitignore
 		dapper-license.txt = dapper-license.txt
-		global.json = global.json
 		license.txt = license.txt
 		membershipreboot-license.txt = membershipreboot-license.txt
 		README.md = README.md
 		run_test_coverage.ps1 = run_test_coverage.ps1
 	EndProjectSection
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "MembershipReboot.Dapper", "MembershipReboot.Dapper\MembershipReboot.Dapper.xproj", "{97588233-4FE8-4D86-9769-BC345EAE8D0A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MembershipReboot.Dapper", "MembershipReboot.Dapper\MembershipReboot.Dapper.csproj", "{DC183630-CF17-41FE-B01E-CAF205A225FF}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "MembershipReboot.Dapper.Tests", "MembershipReboot.Dapper.Tests\MembershipReboot.Dapper.Tests.xproj", "{A0EADA2E-45F4-46C5-88E0-52F538DBD28F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MembershipReboot.Dapper.Tests", "MembershipReboot.Dapper.Tests\MembershipReboot.Dapper.Tests.csproj", "{2F607D01-099B-41E7-8E41-C90A111FDC23}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
 		Release|Any CPU = Release|Any CPU
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{97588233-4FE8-4D86-9769-BC345EAE8D0A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{97588233-4FE8-4D86-9769-BC345EAE8D0A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{97588233-4FE8-4D86-9769-BC345EAE8D0A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{97588233-4FE8-4D86-9769-BC345EAE8D0A}.Release|Any CPU.Build.0 = Release|Any CPU
-		{A0EADA2E-45F4-46C5-88E0-52F538DBD28F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A0EADA2E-45F4-46C5-88E0-52F538DBD28F}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A0EADA2E-45F4-46C5-88E0-52F538DBD28F}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A0EADA2E-45F4-46C5-88E0-52F538DBD28F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DC183630-CF17-41FE-B01E-CAF205A225FF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DC183630-CF17-41FE-B01E-CAF205A225FF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DC183630-CF17-41FE-B01E-CAF205A225FF}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{DC183630-CF17-41FE-B01E-CAF205A225FF}.Debug|x64.Build.0 = Debug|Any CPU
+		{DC183630-CF17-41FE-B01E-CAF205A225FF}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{DC183630-CF17-41FE-B01E-CAF205A225FF}.Debug|x86.Build.0 = Debug|Any CPU
+		{DC183630-CF17-41FE-B01E-CAF205A225FF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DC183630-CF17-41FE-B01E-CAF205A225FF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DC183630-CF17-41FE-B01E-CAF205A225FF}.Release|x64.ActiveCfg = Release|Any CPU
+		{DC183630-CF17-41FE-B01E-CAF205A225FF}.Release|x64.Build.0 = Release|Any CPU
+		{DC183630-CF17-41FE-B01E-CAF205A225FF}.Release|x86.ActiveCfg = Release|Any CPU
+		{DC183630-CF17-41FE-B01E-CAF205A225FF}.Release|x86.Build.0 = Release|Any CPU
+		{2F607D01-099B-41E7-8E41-C90A111FDC23}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2F607D01-099B-41E7-8E41-C90A111FDC23}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2F607D01-099B-41E7-8E41-C90A111FDC23}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{2F607D01-099B-41E7-8E41-C90A111FDC23}.Debug|x64.Build.0 = Debug|Any CPU
+		{2F607D01-099B-41E7-8E41-C90A111FDC23}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{2F607D01-099B-41E7-8E41-C90A111FDC23}.Debug|x86.Build.0 = Debug|Any CPU
+		{2F607D01-099B-41E7-8E41-C90A111FDC23}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2F607D01-099B-41E7-8E41-C90A111FDC23}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2F607D01-099B-41E7-8E41-C90A111FDC23}.Release|x64.ActiveCfg = Release|Any CPU
+		{2F607D01-099B-41E7-8E41-C90A111FDC23}.Release|x64.Build.0 = Release|Any CPU
+		{2F607D01-099B-41E7-8E41-C90A111FDC23}.Release|x86.ActiveCfg = Release|Any CPU
+		{2F607D01-099B-41E7-8E41-C90A111FDC23}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {90A8EAD4-5470-4E3B-BA50-8CEF5A2DE590}
 	EndGlobalSection
 EndGlobal

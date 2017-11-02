@@ -27,20 +27,20 @@ namespace MembershipReboot.Dapper.Tests {
 
         #region Static
 
-        public SqlConnection CreateConnection() => Helpers.CreateConnection(ConnectionString);
-        public SqlConnection CreateClosedConnection() => Helpers.CreateClosedConnection(ConnectionString);
-        public void ResetDatabase(SqlConnection connection) => Helpers.ResetDatabaseExtendedUser(connection);
-        public TObj SetField<TObj, TProp>(TObj obj, TProp value, Expression<Func<TObj, TProp>> propExpr) => Helpers.SetField(obj, value, propExpr);
-        public void CallMethod<TObj>(TObj obj, string methodName, object[] parameters) => Helpers.CallMethod(obj, methodName, parameters);
-        public LimitedPrecisionDateTimeComparer DateTimeComparer => Helpers.DateTimeComparer;
-        public LimitedPrecisionNullableDateTimeComparer NullableDateTimeComparer => Helpers.NullableDateTimeComparer;
+        private SqlConnection CreateConnection() => Helpers.CreateConnection(ConnectionString);
+        private SqlConnection CreateClosedConnection() => Helpers.CreateClosedConnection(ConnectionString);
+        private void ResetDatabase(SqlConnection connection) => Helpers.ResetDatabaseExtendedUser(connection);
+        private TObj SetField<TObj, TProp>(TObj obj, TProp value, Expression<Func<TObj, TProp>> propExpr) => Helpers.SetField(obj, value, propExpr);
+        private void CallMethod<TObj>(TObj obj, string methodName, object[] parameters) => Helpers.CallMethod(obj, methodName, parameters);
+        private LimitedPrecisionDateTimeComparer DateTimeComparer => Helpers.DateTimeComparer;
+        private LimitedPrecisionNullableDateTimeComparer NullableDateTimeComparer => Helpers.NullableDateTimeComparer;
 
-        public static DapperUserAccountRepository<ExtendedUserAccount> CreateRepository(IDbConnection connection) {
+        private static DapperUserAccountRepository<ExtendedUserAccount> CreateRepository(IDbConnection connection) {
             var repo = new DapperUserAccountRepository<ExtendedUserAccount>(connection, userAccountTable: "ExtendedUserAccounts");
             return repo;
         }
 
-        public static DapperUserAccountRepository<ExtendedUserAccount> CreateRepository(IDbConnection connection, string userAccountTable,
+        private static DapperUserAccountRepository<ExtendedUserAccount> CreateRepository(IDbConnection connection, string userAccountTable,
             string userCertificateTable, string userClaimTable, string linkedAccountTable, string linkedAccountClaimTable,
             string twoFactorAuthTokenTable, string passwordResetSecretTable) {
 
@@ -338,47 +338,47 @@ namespace MembershipReboot.Dapper.Tests {
             using (var conn = CreateConnection()) {
                 Assert.Throws<ArgumentNullException>("userAccountTable", () => CreateRepository(conn, null, "user_certificates", "user_claims",
                     "linked_accounts", "linked_account_claims", "two_factor_auth_tokens", "password_reset_secrets"));
-                AssertExceptionMessage(Assert.Throws(typeof(Exception), () => CreateRepository(conn, "user_accounts", null, "user_claims",
+                AssertExceptionMessage(Assert.Throws<Exception>(() => CreateRepository(conn, "user_accounts", null, "user_claims",
                     "linked_accounts", "linked_account_claims", "two_factor_auth_tokens", "password_reset_secrets")), $"The table name specified for RelationalUserCertificate is invalid.");
-                AssertExceptionMessage(Assert.Throws(typeof(Exception), () => CreateRepository(conn, "user_accounts", "user_certificates", null,
+                AssertExceptionMessage(Assert.Throws<Exception>(() => CreateRepository(conn, "user_accounts", "user_certificates", null,
                     "linked_accounts", "linked_account_claims", "two_factor_auth_tokens", "password_reset_secrets")), $"The table name specified for RelationalUserClaim is invalid.");
-                AssertExceptionMessage(Assert.Throws(typeof(Exception), () => CreateRepository(conn, "user_accounts", "user_certificates", "user_claims",
+                AssertExceptionMessage(Assert.Throws<Exception>(() => CreateRepository(conn, "user_accounts", "user_certificates", "user_claims",
                     null, "linked_account_claims", "two_factor_auth_tokens", "password_reset_secrets")), $"The table name specified for RelationalLinkedAccount is invalid.");
-                AssertExceptionMessage(Assert.Throws(typeof(Exception), () => CreateRepository(conn, "user_accounts", "user_certificates", "user_claims",
+                AssertExceptionMessage(Assert.Throws<Exception>(() => CreateRepository(conn, "user_accounts", "user_certificates", "user_claims",
                     "linked_accounts", null, "two_factor_auth_tokens", "password_reset_secrets")), $"The table name specified for RelationalLinkedAccountClaim is invalid.");
-                AssertExceptionMessage(Assert.Throws(typeof(Exception), () => CreateRepository(conn, "user_accounts", "user_certificates", "user_claims",
+                AssertExceptionMessage(Assert.Throws<Exception>(() => CreateRepository(conn, "user_accounts", "user_certificates", "user_claims",
                     "linked_accounts", "linked_account_claims", null, "password_reset_secrets")), $"The table name specified for RelationalTwoFactorAuthToken is invalid.");
-                AssertExceptionMessage(Assert.Throws(typeof(Exception), () => CreateRepository(conn, "user_accounts", "user_certificates", "user_claims",
+                AssertExceptionMessage(Assert.Throws<Exception>(() => CreateRepository(conn, "user_accounts", "user_certificates", "user_claims",
                     "linked_accounts", "linked_account_claims", "two_factor_auth_tokens", null)), $"The table name specified for RelationalPasswordResetSecret is invalid.");
 
                 Assert.Throws<ArgumentNullException>("userAccountTable", () => CreateRepository(conn, "", "user_certificates", "user_claims",
                     "linked_accounts", "linked_account_claims", "two_factor_auth_tokens", "password_reset_secrets"));
-                AssertExceptionMessage(Assert.Throws(typeof(Exception), () => CreateRepository(conn, "user_accounts", "", "user_claims",
+                AssertExceptionMessage(Assert.Throws<Exception>(() => CreateRepository(conn, "user_accounts", "", "user_claims",
                     "linked_accounts", "linked_account_claims", "two_factor_auth_tokens", "password_reset_secrets")), $"The table name specified for RelationalUserCertificate is invalid.");
-                AssertExceptionMessage(Assert.Throws(typeof(Exception), () => CreateRepository(conn, "user_accounts", "user_certificates", "",
+                AssertExceptionMessage(Assert.Throws<Exception>(() => CreateRepository(conn, "user_accounts", "user_certificates", "",
                     "linked_accounts", "linked_account_claims", "two_factor_auth_tokens", "password_reset_secrets")), $"The table name specified for RelationalUserClaim is invalid.");
-                AssertExceptionMessage(Assert.Throws(typeof(Exception), () => CreateRepository(conn, "user_accounts", "user_certificates", "user_claims",
+                AssertExceptionMessage(Assert.Throws<Exception>(() => CreateRepository(conn, "user_accounts", "user_certificates", "user_claims",
                     "", "linked_account_claims", "two_factor_auth_tokens", "password_reset_secrets")), $"The table name specified for RelationalLinkedAccount is invalid.");
-                AssertExceptionMessage(Assert.Throws(typeof(Exception), () => CreateRepository(conn, "user_accounts", "user_certificates", "user_claims",
+                AssertExceptionMessage(Assert.Throws<Exception>(() => CreateRepository(conn, "user_accounts", "user_certificates", "user_claims",
                     "linked_accounts", "", "two_factor_auth_tokens", "password_reset_secrets")), $"The table name specified for RelationalLinkedAccountClaim is invalid.");
-                AssertExceptionMessage(Assert.Throws(typeof(Exception), () => CreateRepository(conn, "user_accounts", "user_certificates", "user_claims",
+                AssertExceptionMessage(Assert.Throws<Exception>(() => CreateRepository(conn, "user_accounts", "user_certificates", "user_claims",
                     "linked_accounts", "linked_account_claims", "", "password_reset_secrets")), $"The table name specified for RelationalTwoFactorAuthToken is invalid.");
-                AssertExceptionMessage(Assert.Throws(typeof(Exception), () => CreateRepository(conn, "user_accounts", "user_certificates", "user_claims",
+                AssertExceptionMessage(Assert.Throws<Exception>(() => CreateRepository(conn, "user_accounts", "user_certificates", "user_claims",
                     "linked_accounts", "linked_account_claims", "two_factor_auth_tokens", "")), $"The table name specified for RelationalPasswordResetSecret is invalid.");
 
                 Assert.Throws<ArgumentNullException>("userAccountTable", () => CreateRepository(conn, "    ", "user_certificates", "user_claims",
                     "linked_accounts", "linked_account_claims", "two_factor_auth_tokens", "password_reset_secrets"));
-                AssertExceptionMessage(Assert.Throws(typeof(Exception), () => CreateRepository(conn, "user_accounts", "    ", "user_claims",
+                AssertExceptionMessage(Assert.Throws<Exception>(() => CreateRepository(conn, "user_accounts", "    ", "user_claims",
                     "linked_accounts", "linked_account_claims", "two_factor_auth_tokens", "password_reset_secrets")), $"The table name specified for RelationalUserCertificate is invalid.");
-                AssertExceptionMessage(Assert.Throws(typeof(Exception), () => CreateRepository(conn, "user_accounts", "user_certificates", "    ",
+                AssertExceptionMessage(Assert.Throws<Exception>(() => CreateRepository(conn, "user_accounts", "user_certificates", "    ",
                     "linked_accounts", "linked_account_claims", "two_factor_auth_tokens", "password_reset_secrets")), $"The table name specified for RelationalUserClaim is invalid.");
-                AssertExceptionMessage(Assert.Throws(typeof(Exception), () => CreateRepository(conn, "user_accounts", "user_certificates", "user_claims",
+                AssertExceptionMessage(Assert.Throws<Exception>(() => CreateRepository(conn, "user_accounts", "user_certificates", "user_claims",
                     "    ", "linked_account_claims", "two_factor_auth_tokens", "password_reset_secrets")), $"The table name specified for RelationalLinkedAccount is invalid.");
-                AssertExceptionMessage(Assert.Throws(typeof(Exception), () => CreateRepository(conn, "user_accounts", "user_certificates", "user_claims",
+                AssertExceptionMessage(Assert.Throws<Exception>(() => CreateRepository(conn, "user_accounts", "user_certificates", "user_claims",
                     "linked_accounts", "    ", "two_factor_auth_tokens", "password_reset_secrets")), $"The table name specified for RelationalLinkedAccountClaim is invalid.");
-                AssertExceptionMessage(Assert.Throws(typeof(Exception), () => CreateRepository(conn, "user_accounts", "user_certificates", "user_claims",
+                AssertExceptionMessage(Assert.Throws<Exception>(() => CreateRepository(conn, "user_accounts", "user_certificates", "user_claims",
                     "linked_accounts", "linked_account_claims", "    ", "password_reset_secrets")), $"The table name specified for RelationalTwoFactorAuthToken is invalid.");
-                AssertExceptionMessage(Assert.Throws(typeof(Exception), () => CreateRepository(conn, "user_accounts", "user_certificates", "user_claims",
+                AssertExceptionMessage(Assert.Throws<Exception>(() => CreateRepository(conn, "user_accounts", "user_certificates", "user_claims",
                     "linked_accounts", "linked_account_claims", "two_factor_auth_tokens", "    ")), $"The table name specified for RelationalPasswordResetSecret is invalid.");
             }
         }

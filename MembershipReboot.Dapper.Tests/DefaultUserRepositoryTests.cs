@@ -27,15 +27,15 @@ namespace MembershipReboot.Dapper.Tests {
 
         #region Static
 
-        public SqlConnection CreateConnection() => Helpers.CreateConnection(ConnectionString);
-        public SqlConnection CreateClosedConnection() => Helpers.CreateClosedConnection(ConnectionString);
-        public void ResetDatabase(SqlConnection connection) => Helpers.ResetDatabase(connection);
-        public TObj SetField<TObj, TProp>(TObj obj, TProp value, Expression<Func<TObj, TProp>> propExpr) => Helpers.SetField(obj, value, propExpr);
-        public void CallMethod<TObj>(TObj obj, string methodName, object[] parameters) => Helpers.CallMethod(obj, methodName, parameters);
-        public LimitedPrecisionDateTimeComparer DateTimeComparer => Helpers.DateTimeComparer;
-        public LimitedPrecisionNullableDateTimeComparer NullableDateTimeComparer => Helpers.NullableDateTimeComparer;
+        private SqlConnection CreateConnection() => Helpers.CreateConnection(ConnectionString);
+        private SqlConnection CreateClosedConnection() => Helpers.CreateClosedConnection(ConnectionString);
+        private void ResetDatabase(SqlConnection connection) => Helpers.ResetDatabase(connection);
+        private TObj SetField<TObj, TProp>(TObj obj, TProp value, Expression<Func<TObj, TProp>> propExpr) => Helpers.SetField(obj, value, propExpr);
+        private void CallMethod<TObj>(TObj obj, string methodName, object[] parameters) => Helpers.CallMethod(obj, methodName, parameters);
+        private LimitedPrecisionDateTimeComparer DateTimeComparer => Helpers.DateTimeComparer;
+        private LimitedPrecisionNullableDateTimeComparer NullableDateTimeComparer => Helpers.NullableDateTimeComparer;
 
-        public static DefaultUserAccountRepository CreateRepository(IDbConnection connection) {
+        private static DefaultUserAccountRepository CreateRepository(IDbConnection connection) {
             var repo = new DefaultUserAccountRepository(connection);
             return repo;
         }

@@ -26,19 +26,19 @@ namespace MembershipReboot.Dapper.Tests {
 
         #region Static
 
-        public SqlConnection CreateConnection() => Helpers.CreateConnection(ConnectionString);
-        public SqlConnection CreateClosedConnection() => Helpers.CreateClosedConnection(ConnectionString);
-        public void ResetDatabase(SqlConnection connection) => Helpers.ResetDatabaseExtendedGroup(connection);
-        public TObj SetField<TObj, TProp>(TObj obj, TProp value, Expression<Func<TObj, TProp>> propExpr) => Helpers.SetField(obj, value, propExpr);
-        public void CallMethod<TObj>(TObj obj, string methodName, object[] parameters) => Helpers.CallMethod(obj, methodName, parameters);
-        public LimitedPrecisionDateTimeComparer DateTimeComparer => Helpers.DateTimeComparer;
+        private SqlConnection CreateConnection() => Helpers.CreateConnection(ConnectionString);
+        private SqlConnection CreateClosedConnection() => Helpers.CreateClosedConnection(ConnectionString);
+        private void ResetDatabase(SqlConnection connection) => Helpers.ResetDatabaseExtendedGroup(connection);
+        private TObj SetField<TObj, TProp>(TObj obj, TProp value, Expression<Func<TObj, TProp>> propExpr) => Helpers.SetField(obj, value, propExpr);
+        private void CallMethod<TObj>(TObj obj, string methodName, object[] parameters) => Helpers.CallMethod(obj, methodName, parameters);
+        private LimitedPrecisionDateTimeComparer DateTimeComparer => Helpers.DateTimeComparer;
 
-        public static DapperGroupRepository<ExtendedGroup> CreateRepository(IDbConnection connection) {
+        private static DapperGroupRepository<ExtendedGroup> CreateRepository(IDbConnection connection) {
             var repo = new DapperGroupRepository<ExtendedGroup>(connection, groupTable: "ExtendedGroups");
             return repo;
         }
 
-        public static DapperGroupRepository<ExtendedGroup> CreateRepository(IDbConnection connection, string groupName, string childGroupName) {
+        private static DapperGroupRepository<ExtendedGroup> CreateRepository(IDbConnection connection, string groupName, string childGroupName) {
             var repo = new DapperGroupRepository<ExtendedGroup>(connection, null, groupName, new Dictionary<Type, string> {
                 [typeof(RelationalGroupChild)] = childGroupName
             });
@@ -115,13 +115,13 @@ namespace MembershipReboot.Dapper.Tests {
         public void NullEmptyOrWhitespaceTableNameThrows() {
             using (var conn = CreateConnection()) {
                 Assert.Throws<ArgumentNullException>("groupTable", () => CreateRepository(conn, null, "group_child_table"));
-                AssertExceptionMessage(Assert.Throws(typeof(Exception), () => CreateRepository(conn, "group_table", null)), "The table name specified for RelationalGroupChild is invalid.");
+                AssertExceptionMessage(Assert.Throws<Exception>(() => CreateRepository(conn, "group_table", null)), "The table name specified for RelationalGroupChild is invalid.");
 
                 Assert.Throws<ArgumentNullException>("groupTable", () => CreateRepository(conn, "", "group_child_table"));
-                AssertExceptionMessage(Assert.Throws(typeof(Exception), () => CreateRepository(conn, "group_table", "")), "The table name specified for RelationalGroupChild is invalid.");
+                AssertExceptionMessage(Assert.Throws<Exception>(() => CreateRepository(conn, "group_table", "")), "The table name specified for RelationalGroupChild is invalid.");
 
                 Assert.Throws<ArgumentNullException>("groupTable", () => CreateRepository(conn, "    ", "group_child_table"));
-                AssertExceptionMessage(Assert.Throws(typeof(Exception), () => CreateRepository(conn, "group_table", "    ")), "The table name specified for RelationalGroupChild is invalid.");
+                AssertExceptionMessage(Assert.Throws<Exception>(() => CreateRepository(conn, "group_table", "    ")), "The table name specified for RelationalGroupChild is invalid.");
             }
         }
 
@@ -493,7 +493,7 @@ namespace MembershipReboot.Dapper.Tests {
                 var repo = CreateRepository(conn);
                 var groups = repo.GetByIDs(new Guid[] { id });
                 Assert.NotNull(groups);
-                Assert.Equal(1, groups.Count());
+                Assert.Single(groups);
                 var group = groups.FirstOrDefault();
                 Assert.NotNull(group);
                 Assert.NotNull(group.Children);
@@ -525,7 +525,7 @@ namespace MembershipReboot.Dapper.Tests {
                 var repo = CreateRepository(conn);
                 var groups = repo.GetByIDs(new Guid[] { id });
                 Assert.NotNull(groups);
-                Assert.Equal(1, groups.Count());
+                Assert.Single(groups);
                 var group = groups.FirstOrDefault();
                 Assert.NotNull(group);
                 Assert.NotNull(group.Children);
@@ -600,7 +600,7 @@ namespace MembershipReboot.Dapper.Tests {
                 var repo = CreateRepository(conn);
                 var groups = repo.GetByChildID(childGroupID);
                 Assert.NotNull(groups);
-                Assert.Equal(0, groups.Count());
+                Assert.Empty(groups);
             }
         }
 
@@ -620,7 +620,7 @@ namespace MembershipReboot.Dapper.Tests {
                 var repo = CreateRepository(conn);
                 var groups = repo.GetByChildID(childGroupID);
                 Assert.NotNull(groups);
-                Assert.Equal(0, groups.Count());
+                Assert.Empty(groups);
             }
         }
 
@@ -640,7 +640,7 @@ namespace MembershipReboot.Dapper.Tests {
                 var repo = CreateRepository(conn);
                 var groups = repo.GetByChildID(childGroupID);
                 Assert.NotNull(groups);
-                Assert.Equal(1, groups.Count());
+                Assert.Single(groups);
                 var group = groups.First();
                 Assert.NotNull(group);
                 Assert.NotNull(group.Children);
@@ -671,7 +671,7 @@ namespace MembershipReboot.Dapper.Tests {
                 var repo = CreateRepository(conn);
                 var groups = repo.GetByChildID(childGroupID);
                 Assert.NotNull(groups);
-                Assert.Equal(1, groups.Count());
+                Assert.Single(groups);
                 var group = groups.First();
                 Assert.NotNull(group);
                 Assert.NotNull(group.Children);
@@ -977,7 +977,7 @@ namespace MembershipReboot.Dapper.Tests {
                 Assert.Equal(group.LastUpdated, groupFromDb.LastUpdated, DateTimeComparer);
 
                 Assert.NotNull(groupFromDb.Children);
-                Assert.Equal(1, groupFromDb.Children.Count());
+                Assert.Single(groupFromDb.Children);
                 var child = (RelationalGroupChild)groupFromDb.Children.First();
                 Assert.NotNull(child);
                 Assert.Equal(groupFromDb.Key, child.ParentKey);
@@ -992,7 +992,7 @@ namespace MembershipReboot.Dapper.Tests {
                 Assert.NotNull(groupFromDb);
 
                 Assert.NotNull(groupFromDb.Children);
-                Assert.Equal(1, groupFromDb.Children.Count());
+                Assert.Single(groupFromDb.Children);
                 child = (RelationalGroupChild)groupFromDb.Children.First();
                 Assert.NotNull(child);
                 Assert.Equal(childKey, child.Key);
@@ -1049,7 +1049,7 @@ namespace MembershipReboot.Dapper.Tests {
                 Assert.NotNull(groupFromDb);
 
                 Assert.NotNull(groupFromDb.Children);
-                Assert.Equal(1, groupFromDb.Children.Count());
+                Assert.Single(groupFromDb.Children);
                 foreach (var child in groupFromDb.ChildrenCollection) {
                     Assert.NotNull(child);
                     Assert.Equal(groupFromDb.Key, child.ParentKey);
