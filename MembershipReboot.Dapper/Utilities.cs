@@ -57,8 +57,7 @@ namespace MembershipReboot.Dapper {
         /// </summary>
         public virtual string GetColumnIdentifiers(Type t) {
             var typeHandle = t.TypeHandle;
-            string str = "";
-            if (!_columnIdentifiers.TryGetValue(typeHandle, out str)) {
+            if (!_columnIdentifiers.TryGetValue(typeHandle, out string str)) {
                 var properties = GetTypePropertyNames(t);
                 str = string.Join(", ", properties.Select(s => $"{QuoteIdentifier(s)}"));
                 _columnIdentifiers[typeHandle] = str;
@@ -78,8 +77,7 @@ namespace MembershipReboot.Dapper {
         /// </summary>
         public virtual string GetColumnParameters(Type t) {
             var typeHandle = t.TypeHandle;
-            string str = "";
-            if (!_columnParameters.TryGetValue(typeHandle, out str)) {
+            if (!_columnParameters.TryGetValue(typeHandle, out string str)) {
                 var properties = GetTypePropertyNames(t);
                 str = string.Join(", ", properties.Select(s => $"@{s}"));
                 _columnParameters[typeHandle] = str;
@@ -101,8 +99,7 @@ namespace MembershipReboot.Dapper {
         /// </summary>
         public virtual string GetColumnAssignment(Type t) {
             var typeHandle = t.TypeHandle;
-            string str = "";
-            if (!_columnAssignment.TryGetValue(typeHandle, out str)) {
+            if (!_columnAssignment.TryGetValue(typeHandle, out string str)) {
                 var properties = GetTypePropertyNames(t);
                 str = string.Join(", ", properties.Select(s => $"{QuoteIdentifier(s)} = @{s}"));
                 _columnAssignment[typeHandle] = str;

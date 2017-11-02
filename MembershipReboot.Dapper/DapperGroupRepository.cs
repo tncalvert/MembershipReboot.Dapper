@@ -57,8 +57,7 @@ namespace MembershipReboot.Dapper {
         /// <param name="type">The type.</param>
         /// <returns>The table name.</returns>
         protected virtual string GetTableName(Type type) {
-            string name = null;
-            TableNameMap.TryGetValue(type, out name);
+            TableNameMap.TryGetValue(type, out string name);
             if (string.IsNullOrWhiteSpace(name)) {
                 throw new Exception($"There is no table name specified for {type.Name} or it is invalid.");
             }
@@ -71,8 +70,7 @@ namespace MembershipReboot.Dapper {
         /// <param name="type">The type.</param>
         /// <returns>The key property.</returns>
         protected virtual PropertyInfo GetKeySelector(Type type) {
-            PropertyInfo prop = null;
-            KeySelectorMap.TryGetValue(type, out prop);
+            KeySelectorMap.TryGetValue(type, out PropertyInfo prop);
             if (prop == null) {
                 throw new Exception($"There is no key property specified for {type.Name} or it is invalid.");
             }
