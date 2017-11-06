@@ -13,9 +13,9 @@ Clone the repository
 git clone https://github.com/tncalvert/MembershipReboot.Dapper.git
 ```
 
-The project uses .NET Core version 1.0.0-preview2-003131 or later which can be found [here](https://www.microsoft.com/net/download).
+The project targets .NET Framework 4.5.2 and is built using the .NET Core 2.0.2 which can be found [here](https://www.microsoft.com/net/download/windows).
 
-You can build the project through Visual Studio 2015 or from the command line with the `dotnet` command.
+You can build the project through Visual Studio 2017 or from the command line with the `dotnet` command.
 
 ### Usage
 
@@ -35,26 +35,28 @@ The repository must be provided to the appropriate MembershipReboot service, eit
 
 * `DapperUserAccountRepository`
 ```C#
-DapperUserAccountRepository(IDbConnection connection, Utilities utilities = null, string userAccountTable = "UserAccounts",
+DapperUserAccountRepository(IDbConnection connection, Utilities utilities = null, string schema = "dbo", string userAccountTable = "UserAccounts",
             Dictionary<Type, string> tableNameMap = null, Dictionary<Type, PropertyInfo> keySelectorMap = null)
 ```
 | Parameter | Purpose | Default | Notes |
 | --- | --- | --- | --- |
 | connection | The instance of `IDbConnection` that is connected to the database. | none | Must be instantiated. If it is closed, it will be opened. |
 | utilities | An instance of the `Utilities` class | null | See below for details. |
+| schema | The name of the schema used for tables | "dbo" | |
 | userAccountTable | The name of the table used to store accounts | "UserAccounts" | |
 | tableNameMap | Used to map child type objects (e.g., user claims) to the appropriate table. | null | Default values are provided for the child types in `RelationalUserAccount`. See below. |
 | keySelectorMap | Used to define the key property of child types. | null | Default values are provided for the types in `RelationalUserAccount`. See below. |
 
 * `DapperGroupRepository`
 ```C#
-DapperGroupRepository(IDbConnection connection, Utilities utilities = null, string groupTable = "Groups",
+DapperGroupRepository(IDbConnection connection, Utilities utilities = null, string schema = "dbo", string groupTable = "Groups",
             Dictionary<Type, string> tableNameMap = null, Dictionary<Type, PropertyInfo> keySelectorMap = null)
 ```
 | Parameter | Purpose | Default | Notes |
 | --- | --- | --- | --- |
 | connection | The instance of `IDbConnection` that is connected to the database. | none | Must be instantiated. If it is closed, it will be opened. |
 | utilities | An instance of the `Utilities` class | null | See below for details. |
+| schema | The name of the schema used for tables | "dbo" | |
 | groupTable | The name of the table used to store accounts | "Groups" | |
 | tableNameMap | Used to map child type objects (e.g., group childs) to the appropriate table. | null | Default values are provided for the child types in `RelationalGroup`. See below. |
 | keySelectorMap | Used to define the key property of child types. | null | Default values are provided for the types in `RelationalGroup`. See below. |
@@ -129,6 +131,7 @@ that implement `ICollection<>`.
 protected virtual bool IncludeProperty(PropertyInfo property)
 ```
 Determines if a property should be included. The default behavior is to check `IgnoredTypes` and `IgnoredNames`.
+Additionally, read-only properties are ignored.
 
 ```
 protected virtual Type[] IgnoredTypes
@@ -145,7 +148,7 @@ Returns an array of string containing the names that are ignored by default when
 The default values are `[ "Key", "ParentKey" ]`.
 
 ```
-protected virtual string QuoteIdentifier(string id)
+public virtual string QuoteIdentifier(string id)
 ```
 Quotes an identifier for use in an SQL statement. The default is to use square brackets ([, ]).
 
