@@ -19,6 +19,11 @@ namespace MembershipReboot.Dapper {
         #region Public Properties
 
         /// <summary>
+        /// The schema for the tables. Default from constructor is "dbo".
+        /// </summary>
+        public virtual string Schema { get; set; }
+
+        /// <summary>
         /// The name of the table that represents Groups. Default from constructor is "Groups".
         /// </summary>
         public virtual string GroupTable { get; set; }
@@ -46,6 +51,11 @@ namespace MembershipReboot.Dapper {
         /// The <see cref="Utilities"/> class used by the repository
         /// </summary>
         protected virtual Utilities _utilities { get; set; }
+
+        /// <summary>
+        /// A quoted version of the schema name.
+        /// </summary>
+        protected virtual string QSchema => Q(Schema);
 
         #endregion Protected Properties
 
@@ -83,6 +93,15 @@ namespace MembershipReboot.Dapper {
             return null;
         }
 
+        /// <summary>
+        /// Quotes a string for use in a SQL statement by using <see cref="Utilities.QuoteIdentifier(string)"/>.
+        /// </summary>
+        /// <param name="str">The string to quote.</param>
+        /// <returns>The quoted string.</returns>
+        private string Q(string str) {
+            return _utilities.QuoteIdentifier(str);
+        }
+
         #endregion Helper Methods
 
         #region Constructors
@@ -92,6 +111,7 @@ namespace MembershipReboot.Dapper {
         /// </summary>
         /// <param name="connection">The connection to the database. If the connection is not open, an attempt is made to open it.</param>
         /// <param name="utilities">An instance of the <see cref="Utilities"/> class. Defaults to null, in which case a new instance is created.</param>
+        /// <param name="schema">The schema used for the tables. Default is "dbo".</param>
         /// <param name="groupTable">The name of the table that represents Groups. Default is "Groups".</param>
         /// <param name="tableNameMap">A dictionary mapping any custom types used to their corresponding table names.</param>
         /// <param name="keySelectorMap">A dictionary mapping any custom types used to a <see cref="PropertyInfo"/> object that can be used to retrieve the primary key.</param>
@@ -101,7 +121,7 @@ namespace MembershipReboot.Dapper {
         /// <exception cref="ArgumentException">
         /// If <paramref name="connection"/> fails to open.
         /// </exception>
-        public DapperGroupRepository(IDbConnection connection, Utilities utilities = null, string groupTable = "Groups",
+        public DapperGroupRepository(IDbConnection connection, Utilities utilities = null, string schema = "dbo", string groupTable = "Groups",
             Dictionary<Type, string> tableNameMap = null, Dictionary<Type, PropertyInfo> keySelectorMap = null) {
             if (connection == null) throw new ArgumentNullException(nameof(connection));
             if (string.IsNullOrWhiteSpace(groupTable)) throw new ArgumentNullException(nameof(groupTable));
@@ -118,6 +138,7 @@ namespace MembershipReboot.Dapper {
             Connection = connection;
             _utilities = utilities ?? new Utilities();
 
+            Schema = _utilities.EscapeTableName(schema);
             GroupTable = _utilities.EscapeTableName(groupTable);
 
             // NOTE(tim): Ignore results, we just want to populate the cache.
@@ -183,9 +204,9 @@ namespace MembershipReboot.Dapper {
                 var childType = prop.PropertyType.GetGenericArguments()[0];
                 var tableName = GetTableName(childType);
                 if (!multiple) {
-                    builder.AppendLine($"select * from [dbo].[{tableName}] where [ParentKey] = @primaryKey;");
+                    builder.AppendLine($"select * from {QSchema}.{Q(tableName)} where {Q("ParentKey")} = @primaryKey;");
                 } else {
-                    builder.AppendLine($"select * from [dbo].[{tableName}] where [ParentKey] in (select [Key] from @primaryKeys);");
+                    builder.AppendLine($"select * from {QSchema}.{Q(tableName)} where {Q("ParentKey")} in (select {Q("Key")} from @primaryKeys);");
                 }
             }
 
@@ -203,8 +224,8 @@ namespace MembershipReboot.Dapper {
         protected virtual TGroup SelectSingle(string whereClause, object parameters) {
             var sql =
 $@"declare @primaryKey int = -1;
-select @primaryKey = [Key] from [dbo].[{GroupTable}] as [Group] where {whereClause};
-select * from [dbo].[{GroupTable}] where [Key] = @primaryKey;
+select @primaryKey = {Q("Key")} from {QSchema}.{Q(GroupTable)} as {Q("Group")} where {whereClause};
+select * from {QSchema}.{Q(GroupTable)} where {Q("Key")} = @primaryKey;
 {SelectChildren()}";
 
             using (var multi = Connection.QueryMultiple(sql, parameters)) {
@@ -239,9 +260,9 @@ select * from [dbo].[{GroupTable}] where [Key] = @primaryKey;
         /// <returns>An enumerable, possibly empty, containing all groups that match the where clause.</returns>
         protected virtual IEnumerable<TGroup> SelectMultiple(string whereClause, object parameters) {
             var sql =
-$@"declare @primaryKeys table([Key] int);
-insert into @primaryKeys select [Key] from [dbo].[{GroupTable}] as [Group] where {whereClause};
-select * from [dbo].[{GroupTable}] where [Key] in (select [Key] from @primaryKeys);
+$@"declare @primaryKeys table({Q("Key")} int);
+insert into @primaryKeys select {Q("Key")} from {QSchema}.{Q(GroupTable)} as {Q("Group")} where {whereClause};
+select * from {QSchema}.{Q(GroupTable)} where {Q("Key")} in (select {Q("Key")} from @primaryKeys);
 {SelectChildren(true)}";
 
             using (var multi = Connection.QueryMultiple(sql, parameters)) {
@@ -291,7 +312,7 @@ select * from [dbo].[{GroupTable}] where [Key] in (select [Key] from @primaryKey
         /// <param name="id">The id to look for.</param>
         /// <returns>A group with the provided id, or null.</returns>
         public virtual TGroup GetByID(Guid id) {
-            var where = "[ID] = @id";
+            var where = $"{Q("ID")} = @id";
             return SelectSingle(where, new { id = id });
         }
 
@@ -306,7 +327,7 @@ select * from [dbo].[{GroupTable}] where [Key] in (select [Key] from @primaryKey
             if (string.IsNullOrWhiteSpace(tenant)) throw new ArgumentNullException(nameof(tenant));
             if (string.IsNullOrWhiteSpace(name)) throw new ArgumentNullException(nameof(name));
 
-            var where = "[Tenant] = @tenant and [Name] = @name";
+            var where = $"{Q("Tenant")} = @tenant and {Q("Name")} = @name";
             return SelectSingle(where, new { tenant = tenant, name = name });
         }
 
@@ -319,7 +340,7 @@ select * from [dbo].[{GroupTable}] where [Key] in (select [Key] from @primaryKey
         public virtual IEnumerable<TGroup> GetByIDs(Guid[] ids) {
             if (ids == null) throw new ArgumentNullException(nameof(ids));
 
-            var where = "[ID] in @ids";
+            var where = $"{Q("ID")} in @ids";
             return SelectMultiple(where, new { ids = ids });
         }
 
@@ -329,7 +350,7 @@ select * from [dbo].[{GroupTable}] where [Key] in (select [Key] from @primaryKey
         /// <param name="childGroupID">The child group id to search for</param>
         /// <returns>An enumerable of groups that have matching children, or an empty enumerable.</returns>
         public virtual IEnumerable<TGroup> GetByChildID(Guid childGroupID) {
-            var where = $"(select count(*) from [dbo].[{GetTableName(typeof(RelationalGroupChild))}] as [Child] where [Child].[ParentKey] = [Group].[Key] and [Child].[ChildGroupID] = @childGroupID) > 0";
+            var where = $"(select count(*) from {QSchema}.{Q(GetTableName(typeof(RelationalGroupChild)))} as {Q("Child")} where {Q("Child")}.{Q("ParentKey")} = {Q("Group")}.{Q("Key")} and {Q("Child")}.{Q("ChildGroupID")} = @childGroupID) > 0";
             return SelectMultiple(where, new { childGroupID = childGroupID });
         }
 
@@ -345,7 +366,7 @@ select * from [dbo].[{GroupTable}] where [Key] in (select [Key] from @primaryKey
             var groupParams = _utilities.GetColumnParameters<TGroup>();
 
             using (var trx = new AutoDbTransaction(Connection)) {
-                var sql = $"insert into [dbo].[{GroupTable}] ({groupColumns}) values ({groupParams}); select SCOPE_IDENTITY() as id;";
+                var sql = $"insert into {QSchema}.{Q(GroupTable)} ({groupColumns}) values ({groupParams}); select SCOPE_IDENTITY() as id;";
 
                 int key = -1;
                 using (var multi = Connection.QueryMultiple(sql, item, trx.Trx)) {
@@ -381,7 +402,7 @@ select * from [dbo].[{GroupTable}] where [Key] in (select [Key] from @primaryKey
 
             var childColumns = _utilities.GetColumnIdentifiers(type);
             var childParams = _utilities.GetColumnParameters(type);
-            var sql = $"insert into [dbo].[{GetTableName(type)}] ([ParentKey], {childColumns}) values ({parentKey}, {childParams});";
+            var sql = $"insert into {QSchema}.{Q(GetTableName(type))} ({Q("ParentKey")}, {childColumns}) values ({parentKey}, {childParams});";
             Connection.Execute(sql, collection, trx);
         }
 
@@ -399,7 +420,7 @@ select * from [dbo].[{GroupTable}] where [Key] in (select [Key] from @primaryKey
 
             using (var trx = new AutoDbTransaction(Connection)) {
 
-                var sql = $"update [dbo].[{GroupTable}] set {columnAssign} where [Key] = @key;";
+                var sql = $"update {QSchema}.{Q(GroupTable)} set {columnAssign} where {Q("Key")} = @key;";
                 Connection.Execute(sql, item, trx.Trx);
 
                 var childrenProps = _utilities.GetChildCollectionProperties<TGroup>();
@@ -430,27 +451,27 @@ select * from [dbo].[{GroupTable}] where [Key] in (select [Key] from @primaryKey
                 var genType = colType.GetGenericArguments()[0];
                 var tableName = GetTableName(genType);
 
-                var sql = $"delete from [dbo].[{tableName}] where [ParentKey] = @key;";
+                var sql = $"delete from {QSchema}.{Q(tableName)} where {Q("ParentKey")} = @key;";
                 Connection.Execute(sql, new { key = parentKey }, trx);
             } else {
                 var type = FirstFromCollection(collection).GetType();
                 var tableName = GetTableName(type);
 
-                var sql = $"delete from [dbo].[{tableName}] where [ParentKey] = @key and [Key] not in @childKeys;";
+                var sql = $"delete from {QSchema}.{Q(tableName)} where {Q("ParentKey")} = @key and {Q("Key")} not in @childKeys;";
                 Connection.Execute(sql, new { key = parentKey, childKeys = GetChildKeys(collection) }, trx);
 
                 var columns = _utilities.GetColumnIdentifiers(type);
                 var parameters = _utilities.GetColumnParameters(type);
                 var props = _utilities.GetTypePropertyNames(type);
-                var insert = string.Join(", ", props.Select(s => $"[Source].[{s}]"));
-                var update = string.Join(", ", props.Select(s => $"[Target].[{s}] = [Source].[{s}]"));
+                var insert = string.Join(", ", props.Select(s => $"{Q("Source")}.{Q(s)}"));
+                var update = string.Join(", ", props.Select(s => $"{Q("Target")}.{Q(s)} = {Q("Source")}.{Q(s)}"));
 
                 sql =
-$@"merge [dbo].[{tableName}] as [Target]
-using (select @key, @parentKey, {parameters}) as [Source] ([Key], [ParentKey], {columns})
-on ([Target].[Key] = [Source].[Key])
-when not matched then insert ([ParentKey], {columns}) values ([Source].[ParentKey], {insert})
-when matched then update set [Target].[ParentKey] = [Source].[ParentKey], {update};";
+$@"merge {QSchema}.{Q(tableName)} as {Q("Target")}
+using (select @key, @parentKey, {parameters}) as {Q("Source")} ({Q("Key")}, {Q("ParentKey")}, {columns})
+on ({Q("Target")}.{Q("Key")} = {Q("Source")}.{Q("Key")})
+when not matched then insert ({Q("ParentKey")}, {columns}) values ({Q("Source")}.{Q("ParentKey")}, {insert})
+when matched then update set {Q("Target")}.{Q("ParentKey")} = {Q("Source")}.{Q("ParentKey")}, {update};";
                 Connection.Execute(sql, collection, trx);
             }
         }
@@ -480,7 +501,7 @@ when matched then update set [Target].[ParentKey] = [Source].[ParentKey], {updat
             foreach (var prop in childProps) {
                 var childType = prop.PropertyType.GetGenericArguments()[0];
                 var tableName = GetTableName(childType);
-                builder.AppendLine($"delete from [dbo].[{tableName}] where [ParentKey] = @key;");
+                builder.AppendLine($"delete from {QSchema}.{Q(tableName)} where {Q("ParentKey")} = @key;");
             }
 
             return builder.ToString();
@@ -497,7 +518,7 @@ when matched then update set [Target].[ParentKey] = [Source].[ParentKey], {updat
             using (var trx = new AutoDbTransaction(Connection)) {
                 var sql =
 $@"{DeleteChildren()}
-delete from [dbo].[{GroupTable}] where [Key] = @key;";
+delete from {QSchema}.{Q(GroupTable)} where {Q("Key")} = @key;";
 
                 Connection.Execute(sql, new { key = item.Key }, trx.Trx);
 

@@ -39,7 +39,7 @@ namespace MembershipReboot.Dapper.Tests {
         }
 
         private static DapperGroupRepository<RelationalGroup> CreateRepository(IDbConnection connection, string groupName, string childGroupName) {
-            var repo = new DapperGroupRepository<RelationalGroup>(connection, null, groupName, new Dictionary<Type, string> {
+            var repo = new DapperGroupRepository<RelationalGroup>(connection, null, "dbo", groupName, new Dictionary<Type, string> {
                 [typeof(RelationalGroupChild)] = childGroupName
             });
             return repo;

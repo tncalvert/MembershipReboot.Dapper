@@ -20,6 +20,11 @@ namespace MembershipReboot.Dapper {
         #region Public Properties
 
         /// <summary>
+        /// The schema for the tables. Default from constructor is "dbo".
+        /// </summary>
+        public virtual string Schema { get; set; }
+
+        /// <summary>
         /// The name of the table that represents User Accounts. Default from constructor is "UserAccounts".
         /// </summary>
         public virtual string UserAccountTable { get; set; }
@@ -47,6 +52,11 @@ namespace MembershipReboot.Dapper {
         /// The <see cref="Utilities"/> class used by the repository
         /// </summary>
         protected virtual Utilities _utilities { get; set; }
+
+        /// <summary>
+        /// A quoted version of the schema name.
+        /// </summary>
+        protected virtual string QSchema => Q(Schema);
 
         #endregion Protected Properties
 
@@ -84,6 +94,15 @@ namespace MembershipReboot.Dapper {
             return null;
         }
 
+        /// <summary>
+        /// Quotes a string for use in a SQL statement by using <see cref="Utilities.QuoteIdentifier(string)"/>.
+        /// </summary>
+        /// <param name="str">The string to quote.</param>
+        /// <returns>The quoted string.</returns>
+        private string Q(string str) {
+            return _utilities.QuoteIdentifier(str);
+        }
+
         #endregion Helper Methods
 
         #region Constructors
@@ -93,6 +112,7 @@ namespace MembershipReboot.Dapper {
         /// </summary>
         /// <param name="connection">The connection to the database. If the connection is not open, an attempt is made to open it.</param>
         /// <param name="utilities">An instance of the <see cref="Utilities"/> class. Defaults to null, in which case a new instance is created.</param>
+        /// <param name="schema">The schema used for the tables. Default is "dbo".</param>
         /// <param name="userAccountTable">The name of the table that represents User Accounts. Default is "UserAccounts".</param>
         /// <param name="tableNameMap">A dictionary mapping any custom types used to their corresponding table names.</param>
         /// <param name="keySelectorMap">A dictionary mapping any custom types used to a <see cref="PropertyInfo"/> object that can be used to retrieve the primary key.</param>
@@ -102,7 +122,7 @@ namespace MembershipReboot.Dapper {
         /// <exception cref="ArgumentException">
         /// If <paramref name="connection"/> fails to open.
         /// </exception>
-        public DapperUserAccountRepository(IDbConnection connection, Utilities utilities = null, string userAccountTable = "UserAccounts",
+        public DapperUserAccountRepository(IDbConnection connection, Utilities utilities = null, string schema = "dbo", string userAccountTable = "UserAccounts",
             Dictionary<Type, string> tableNameMap = null, Dictionary<Type, PropertyInfo> keySelectorMap = null) {
 
             if (connection == null) throw new ArgumentNullException(nameof(connection));
@@ -120,6 +140,7 @@ namespace MembershipReboot.Dapper {
             Connection = connection;
             _utilities = utilities ?? new Utilities();
 
+            Schema = _utilities.EscapeTableName(schema);
             UserAccountTable = _utilities.EscapeTableName(userAccountTable);
 
             // NOTE(tim): Ignore results, we just want to populate the cache.
@@ -199,7 +220,7 @@ namespace MembershipReboot.Dapper {
             foreach (var prop in childProps) {
                 var childType = prop.PropertyType.GetGenericArguments()[0];
                 var tableName = GetTableName(childType);
-                builder.AppendLine($"select * from [dbo].[{tableName}] where [ParentKey] = @primaryKey;");
+                builder.AppendLine($"select * from {QSchema}.{Q(tableName)} where {Q("ParentKey")} = @primaryKey;");
             }
 
             return builder.ToString();
@@ -218,8 +239,8 @@ namespace MembershipReboot.Dapper {
 
             var sql =
 $@"declare @primaryKey int = -1;
-select @primaryKey = [Key] from [dbo].[{UserAccountTable}] as [User] where {whereClause};
-select * from [dbo].[{UserAccountTable}] where [Key] = @primaryKey;
+select @primaryKey = {Q("Key")} from {QSchema}.{Q(UserAccountTable)} as {Q("User")} where {whereClause};
+select * from {QSchema}.{Q(UserAccountTable)} where {Q("Key")} = @primaryKey;
 {SelectChildren()}";
 
             using (var multi = Connection.QueryMultiple(sql, parameters)) {
@@ -250,7 +271,7 @@ select * from [dbo].[{UserAccountTable}] where [Key] = @primaryKey;
         /// <param name="id">The id to look for.</param>
         /// <returns>A user with the provided id, or null.</returns>
         public virtual TAccount GetByID(Guid id) {
-            var where = "[User].[ID] = @id";
+            var where = $"{Q("User")}.{Q("ID")} = @id";
             return SelectSingle(where, new { id = id });
         }
 
@@ -265,7 +286,7 @@ select * from [dbo].[{UserAccountTable}] where [Key] = @primaryKey;
         public virtual TAccount GetByUsername(string username) {
             if (string.IsNullOrWhiteSpace(username)) { throw new ArgumentNullException(nameof(username)); }
 
-            var where = "[User].[Username] = @username";
+            var where = $"{Q("User")}.{Q("Username")} = @username";
             return SelectSingle(where, new { username = username });
         }
 
@@ -282,7 +303,7 @@ select * from [dbo].[{UserAccountTable}] where [Key] = @primaryKey;
             if (string.IsNullOrWhiteSpace(tenant)) { throw new ArgumentNullException(nameof(tenant)); }
             if (string.IsNullOrWhiteSpace(username)) { throw new ArgumentNullException(nameof(username)); }
 
-            var where = "[User].[Tenant] = @tenant and [User].[Username] = @username";
+            var where = $"{Q("User")}.{Q("Tenant")} = @tenant and {Q("User")}.{Q("Username")} = @username";
             return SelectSingle(where, new { tenant = tenant, username = username });
         }
 
@@ -299,7 +320,7 @@ select * from [dbo].[{UserAccountTable}] where [Key] = @primaryKey;
             if (string.IsNullOrWhiteSpace(tenant)) { throw new ArgumentNullException(nameof(tenant)); }
             if (string.IsNullOrWhiteSpace(email)) { throw new ArgumentNullException(nameof(email)); }
 
-            var where = "[User].[Tenant] = @tenant and [User].[Email] = @email";
+            var where = $"{Q("User")}.{Q("Tenant")} = @tenant and {Q("User")}.{Q("Email")} = @email";
             return SelectSingle(where, new { tenant = tenant, email = email });
         }
 
@@ -314,7 +335,7 @@ select * from [dbo].[{UserAccountTable}] where [Key] = @primaryKey;
         public virtual TAccount GetByVerificationKey(string key) {
             if (string.IsNullOrWhiteSpace(key)) { throw new ArgumentNullException(nameof(key)); }
 
-            var where = "[User].[VerificationKey] = @key";
+            var where = $"{Q("User")}.{Q("VerificationKey")} = @key";
             return SelectSingle(where, new { key = key });
         }
 
@@ -332,11 +353,11 @@ select * from [dbo].[{UserAccountTable}] where [Key] = @primaryKey;
             if (string.IsNullOrWhiteSpace(thumbprint)) { throw new ArgumentNullException(nameof(thumbprint)); }
 
             var where =
-$@"[User].[Tenant] = @tenant
+$@"{Q("User")}.{Q("Tenant")} = @tenant
   and (select count(*)
-       from [dbo].[{GetTableName(typeof(RelationalUserCertificate))}] as [InnerCert]
-       where [InnerCert].[ParentKey] = [User].[Key]
-         and [InnerCert].[Thumbprint] = @thumbprint) > 0";
+       from {QSchema}.{Q(GetTableName(typeof(RelationalUserCertificate)))} as {Q("InnerCert")}
+       where {Q("InnerCert")}.{Q("ParentKey")} = {Q("User")}.{Q("Key")}
+         and {Q("InnerCert")}.{Q("Thumbprint")} = @thumbprint) > 0";
 
             return SelectSingle(where, new { tenant = tenant, thumbprint = thumbprint });
         }
@@ -357,12 +378,12 @@ $@"[User].[Tenant] = @tenant
             if (string.IsNullOrWhiteSpace(id)) { throw new ArgumentNullException(nameof(id)); }
 
             var where =
-$@"[User].[Tenant] = @tenant
+$@"{Q("User")}.{Q("Tenant")} = @tenant
   and (select count(*)
-       from [dbo].[{GetTableName(typeof(RelationalLinkedAccount))}] as [InnerLinked]
-       where [InnerLinked].[ParentKey] = [User].[Key]
-         and [InnerLinked].[ProviderName] = @provider
-         and [InnerLinked].[ProviderAccountID] = @id) > 0";
+       from {QSchema}.{Q(GetTableName(typeof(RelationalLinkedAccount)))} as {Q("InnerLinked")}
+       where {Q("InnerLinked")}.{Q("ParentKey")} = {Q("User")}.{Q("Key")}
+         and {Q("InnerLinked")}.{Q("ProviderName")} = @provider
+         and {Q("InnerLinked")}.{Q("ProviderAccountID")} = @id) > 0";
 
             return SelectSingle(where, new { tenant = tenant, provider = provider, id = id });
         }
@@ -380,7 +401,7 @@ $@"[User].[Tenant] = @tenant
             if (string.IsNullOrWhiteSpace(tenant)) { throw new ArgumentNullException(nameof(tenant)); }
             if (string.IsNullOrWhiteSpace(phone)) { throw new ArgumentNullException(nameof(phone)); }
 
-            var where = "[User].[Tenant] = @tenant and [User].[MobilePhoneNumber] = @phone";
+            var where = $"{Q("User")}.{Q("Tenant")} = @tenant and {Q("User")}.{Q("MobilePhoneNumber")} = @phone";
 
             return SelectSingle(where, new { tenant = tenant, phone = phone });
         }
@@ -397,7 +418,7 @@ $@"[User].[Tenant] = @tenant
             var userParams = _utilities.GetColumnParameters<TAccount>();
 
             using (var trx = new AutoDbTransaction(Connection)) {
-                var sql = $"insert into [dbo].[{UserAccountTable}] ({userColumns}) values ({userParams}); select SCOPE_IDENTITY() as id;";
+                var sql = $"insert into {QSchema}.{Q(UserAccountTable)} ({userColumns}) values ({userParams}); select SCOPE_IDENTITY() as id;";
 
                 int key = -1;
                 using (var multi = Connection.QueryMultiple(sql, item, trx.Trx)) {
@@ -433,7 +454,7 @@ $@"[User].[Tenant] = @tenant
 
             var childColumns = _utilities.GetColumnIdentifiers(type);
             var childParams = _utilities.GetColumnParameters(type);
-            var sql = $"insert into [dbo].[{GetTableName(type)}] ([ParentKey], {childColumns}) values ({parentKey}, {childParams});";
+            var sql = $"insert into {QSchema}.{Q(GetTableName(type))} ({Q("ParentKey")}, {childColumns}) values ({parentKey}, {childParams});";
             Connection.Execute(sql, collection, trx);
         }
 
@@ -450,7 +471,7 @@ $@"[User].[Tenant] = @tenant
             var columnAssign = _utilities.GetColumnAssignment<TAccount>();
 
             using (var trx = new AutoDbTransaction(Connection)) {
-                var sql = $"update [dbo].[{UserAccountTable}] set {columnAssign} where [Key] = @key;";
+                var sql = $"update {QSchema}.{Q(UserAccountTable)} set {columnAssign} where {Q("Key")} = @key;";
                 Connection.Execute(sql, item, trx.Trx);
 
                 var childrenProps = _utilities.GetChildCollectionProperties<TAccount>();
@@ -481,27 +502,27 @@ $@"[User].[Tenant] = @tenant
                 var genType = colType.GetGenericArguments()[0];
                 var tableName = GetTableName(genType);
 
-                var sql = $"delete from [dbo].[{tableName}] where [ParentKey] = @key;";
+                var sql = $"delete from {QSchema}.{Q(tableName)} where {Q("ParentKey")} = @key;";
                 Connection.Execute(sql, new { key = parentKey }, trx);
             } else {
                 var type = FirstFromCollection(collection).GetType();
                 var tableName = GetTableName(type);
 
-                var sql = $"delete from [dbo].[{tableName}] where [ParentKey] = @key and [Key] not in @childKeys;";
+                var sql = $"delete from {QSchema}.{Q(tableName)} where {Q("ParentKey")} = @key and {Q("Key")} not in @childKeys;";
                 Connection.Execute(sql, new { key = parentKey, childKeys = GetChildKeys(collection) }, trx);
 
                 var columns = _utilities.GetColumnIdentifiers(type);
                 var parameters = _utilities.GetColumnParameters(type);
                 var props = _utilities.GetTypePropertyNames(type);
-                var insert = string.Join(", ", props.Select(s => $"[Source].[{s}]"));
-                var update = string.Join(", ", props.Select(s => $"[Target].[{s}] = [Source].[{s}]"));
+                var insert = string.Join(", ", props.Select(s => $"{Q("Source")}.{Q(s)}"));
+                var update = string.Join(", ", props.Select(s => $"{Q("Target")}.{Q(s)} = {Q("Source")}.{Q(s)}"));
 
                 sql =
-$@"merge [dbo].[{tableName}] as [Target]
-using (select @key, @parentKey, {parameters}) as [Source] ([Key], [ParentKey], {columns})
-on ([Target].[Key] = [Source].[Key])
-when not matched then insert ([ParentKey], {columns}) values ([Source].[ParentKey], {insert})
-when matched then update set [Target].[ParentKey] = [Source].[ParentKey], {update};";
+$@"merge {QSchema}.{Q(tableName)} as {Q("Target")}
+using (select @key, @parentKey, {parameters}) as {Q("Source")} ({Q("Key")}, {Q("ParentKey")}, {columns})
+on ({Q("Target")}.{Q("Key")} = {Q("Source")}.{Q("Key")})
+when not matched then insert ({Q("ParentKey")}, {columns}) values ({Q("Source")}.{Q("ParentKey")}, {insert})
+when matched then update set {Q("Target")}.{Q("ParentKey")} = {Q("Source")}.{Q("ParentKey")}, {update};";
                 Connection.Execute(sql, collection, trx);
             }
         }
@@ -531,7 +552,7 @@ when matched then update set [Target].[ParentKey] = [Source].[ParentKey], {updat
             foreach (var prop in childProps) {
                 var childType = prop.PropertyType.GetGenericArguments()[0];
                 var tableName = GetTableName(childType);
-                builder.AppendLine($"delete from [dbo].[{tableName}] where [ParentKey] = @key;");
+                builder.AppendLine($"delete from {QSchema}.{Q(tableName)} where {Q("ParentKey")} = @key;");
             }
 
             return builder.ToString();
@@ -548,7 +569,7 @@ when matched then update set [Target].[ParentKey] = [Source].[ParentKey], {updat
             using (var trx = new AutoDbTransaction(Connection)) {
                 var sql =
 $@"{DeleteChildren()}
-delete from [dbo].[{UserAccountTable}] where [Key] = @key;";
+delete from {QSchema}.{Q(UserAccountTable)} where {Q("Key")} = @key;";
                 Connection.Execute(sql, new { key = item.Key }, trx.Trx);
 
                 trx.Commit();

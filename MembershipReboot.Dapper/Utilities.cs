@@ -219,7 +219,8 @@ namespace MembershipReboot.Dapper {
         /// and check the property type against the <see cref="IgnoredTypes"/> list. The type is
         /// checked for equality and via <see cref="Type.IsAssignableFrom(Type)"/>. If both the property
         /// type and the currently tested type are generic (<see cref="Type.IsGenericType"/>), the equality and assignable tests are repeated
-        /// with the generic definitions obtained by calling <see cref="Type.GetGenericTypeDefinition"/>.
+        /// with the generic definitions obtained by calling <see cref="Type.GetGenericTypeDefinition"/>. Additionally,
+        /// read-only properties are ignored.
         /// </para>
         /// </summary>
         /// <param name="property">The property</param>
@@ -243,6 +244,12 @@ namespace MembershipReboot.Dapper {
 
                 return false;
             })) {
+                return false;
+            }
+
+            // If we have a read-only property, we don't want to map
+            // it to anything.
+            if (!property.CanWrite) {
                 return false;
             }
 
@@ -276,7 +283,7 @@ namespace MembershipReboot.Dapper {
         /// </summary>
         /// <param name="id">The identifier to quote.</param>
         /// <returns>A quoted version of the identifier.</returns>
-        protected virtual string QuoteIdentifier(string id) {
+        public virtual string QuoteIdentifier(string id) {
             return $"[{id}]";
         }
     }
