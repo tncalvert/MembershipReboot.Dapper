@@ -1,24 +1,35 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <Description>MembershipReboot.Dapper.Tests</Description>
-    <Copyright>2016 Tim Calvert</Copyright>
-    <AssemblyTitle>MembershipReboot.Dapper.Tests</AssemblyTitle>
-    <Authors>Tim Calvert</Authors>
     <TargetFramework>net452</TargetFramework>
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    <DebugType>full</DebugType>
-    <AssemblyName>MembershipReboot.Dapper.Tests</AssemblyName>
+
     <OutputType>Exe</OutputType>
-    <PackageId>MembershipReboot.Dapper.Tests</PackageId>
+    <AssemblyTitle>MembershipReboot.Dapper.Tests</AssemblyTitle>
+    <AssemblyName>MembershipReboot.Dapper.Tests</AssemblyName>
+
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+
+    <DebugType>full</DebugType>
+
     <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
-    <PackageLicenseUrl>https://mit-license.org/license.txt</PackageLicenseUrl>
-    <RepositoryType>git</RepositoryType>
-    <RepositoryUrl>https://github.com/tncalvert/MembershipReboot.Dapper</RepositoryUrl>
     <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
     <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
+
     <StartupObject>MembershipReboot.Dapper.Tests.Program</StartupObject>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <Authors>Tim Calvert</Authors>
+    <PackageId>MembershipReboot.Dapper.Tests</PackageId>
+    <PackageVersion>0.1.1</PackageVersion>
+    <PackageProjectUrl>https://github.com/tncalvert/MembershipReboot.Dapper</PackageProjectUrl>
+    <PackageLicenseUrl>https://raw.githubusercontent.com/tncalvert/MembershipReboot.Dapper/master/license.txt</PackageLicenseUrl>
+    <Description>MembershipReboot.Dapper.Tests</Description>
+    <RepositoryUrl>https://github.com/tncalvert/MembershipReboot.Dapper</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <Copyright>2016 Tim Calvert</Copyright>
+    <PackageTags>MembershipReboot Dapper</PackageTags>
   </PropertyGroup>
 
   <ItemGroup>
